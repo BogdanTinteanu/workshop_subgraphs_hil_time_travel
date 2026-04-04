@@ -80,17 +80,20 @@ Final Output:
 
 Not every AI decision should be fully automated. Human-in-the-loop lets you **interrupt** the graph mid-run, show the current output to a person, and let them approve or correct it before the graph continues.
 
+This example uses `MemorySaver` (checkpointing) and `interrupt_before` to pause execution automatically before the review step, then resume it in a second invoke call.
+
 **Flow:**
 
 ```
-generate → subgraph → review
+generate → subgraph → [pause] → review
 ```
 
 | Step | What happens |
 |------|--------------|
 | `generate` | Creates the initial text |
 | `subgraph` | Improves the text (same mini-graph as Example 1) |
-| `review` | **Pauses and asks you:** approve as-is, or type new text |
+| `[pause]` | Graph stops automatically — state is saved to a checkpoint |
+| `review` | **Resumes and asks you:** approve as-is, or type new text |
 
 **Why use human-in-the-loop?**
 - Catches mistakes before they propagate further in the workflow
@@ -103,9 +106,13 @@ python -m ex_2_human_in_the_loop.main
 
 **What you'll see:**
 ```
+=== RUN 1: Generate text (pause before review) ===
 [Node] Generating text...
 [Node] Running subgraph...
 [Subgraph] Improving text...
+[Paused before review node]
+
+=== RUN 1 (continued): Resume for human review ===
 [Node] Human Review
 Current Output: This is AI generated content. It has been enhanced by subgraph.
 Approve or edit? (yes/edit):
@@ -180,8 +187,8 @@ Notice that in Run 2, `generate` is **skipped** — the graph jumped straight to
 
 ```
 Example 1 (Subgraphs)
-  └── Example 2 (Human-in-the-Loop) — adds a human review step
-        └── Example 3 (Time Travel) — adds checkpointing and state replay
+  └── Example 2 (Human-in-the-Loop) — adds checkpointing and a human review step
+        └── Example 3 (Time Travel) — adds state history inspection and replay
 ```
 
 Each example adds one new capability on top of the same core graph structure.
