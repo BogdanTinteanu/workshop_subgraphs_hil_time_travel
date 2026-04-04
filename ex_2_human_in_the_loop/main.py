@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langgraph.graph import StateGraph
+from langgraph.checkpoint.memory import MemorySaver
 from ex_2_human_in_the_loop.state import GraphState
 from ex_2_human_in_the_loop.nodes import generate_text, run_subgraph, human_review
 
@@ -20,7 +21,7 @@ def build_graph():
     graph.add_edge("generate", "subgraph")
     graph.add_edge("subgraph", "review")
 
-    return graph.compile()
+    return graph.compile(checkpointer=MemorySaver(), interrupt_before=["review"])
 
 
 # -------------------------
@@ -29,8 +30,14 @@ def build_graph():
 if __name__ == "__main__":
     app = build_graph()
 
-    print("\n=== RUN: HUMAN-IN-THE-LOOP EXECUTION ===")
-    result = app.invoke({"text": ""})
+    config = {"configurable": {"thread_id": "thread-1"}}
+
+    print("\n=== RUN 1: Generate text (pause before review) ===")
+    app.invoke({"text": ""}, config=config)
+    print("[Paused before review node]")
+
+    print("\n=== RUN 1 (continued): Resume for human review ===")
+    result = app.invoke(None, config=config)
 
     print("\nFinal Output:")
     print(result["text"])
