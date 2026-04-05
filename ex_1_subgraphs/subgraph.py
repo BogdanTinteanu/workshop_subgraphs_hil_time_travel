@@ -1,13 +1,13 @@
 from langgraph.graph import StateGraph
-from ex_1_subgraphs.state import GraphState
+from ex_1_subgraphs.state import SharedState
 
 
 # -------------------------
 # SUBGRAPH NODE
 # -------------------------
-def improve_text(state: GraphState):
-    print("[Subgraph] Improving text...")
-    state["text"] += " It has been enhanced by subgraph."
+def subgraph_text(state: SharedState):
+    print("[Subgraph] Adding text from subgraph...")
+    state["text"] += " (refined by subgraph)"
     return state
 
 
@@ -15,9 +15,9 @@ def improve_text(state: GraphState):
 # BUILD SUBGRAPH
 # -------------------------
 def build_subgraph():
-    graph = StateGraph(GraphState)
+    graph = StateGraph(SharedState)
 
-    graph.add_node("improve", improve_text)
-    graph.set_entry_point("improve")
+    graph.add_node("refine", subgraph_text)
+    graph.set_entry_point("refine")
 
     return graph.compile()

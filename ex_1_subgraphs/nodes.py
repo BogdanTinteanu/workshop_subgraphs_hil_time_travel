@@ -1,31 +1,26 @@
-from ex_1_subgraphs.state import GraphState
-from ex_1_subgraphs.subgraph import build_subgraph
-
-# Initialize subgraph
-subgraph_app = build_subgraph()
-
+from ex_1_subgraphs.state import SharedState
 
 # -------------------------
-# NODE 1: GENERATE TEXT
+# NODE 1: DRAFT TEXT
 # -------------------------
-def generate_text(state: GraphState):
-    print("\n[Node] Generating text...")
-    state["text"] = "This is AI generated content."
+def draft_text(state: SharedState):
+    print("\n[Node] Drafting initial text...")
+    state["text"] = "The quick brown fox jumps over the lazy dog."
     return state
 
 
 # -------------------------
 # NODE 2: CALL SUBGRAPH
 # -------------------------
-def run_subgraph(state: GraphState):
-    print("\n[Node] Running subgraph...")
-    return subgraph_app.invoke(state)
+def run_subgraph(state: SharedState, subgraph):
+    print("\n[Node] Refining text via subgraph...")
+    return subgraph.invoke(state)
 
 
 # -------------------------
-# NODE 3: FORMAT OUTPUT
+# NODE 3: FINAL OUTPUT
 # -------------------------
-def format_output(state: GraphState):
-    print("\n[Node] Formatting output...")
+def final_output(state: SharedState):
+    print("\n[Node] Preparing final output...")
     state["text"] = f"[FINAL] {state['text']}"
     return state

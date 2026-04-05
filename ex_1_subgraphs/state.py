@@ -2,5 +2,5 @@
 
 from typing import TypedDict
 
-class GraphState(TypedDict):
+class SharedState(TypedDict):
     text: str

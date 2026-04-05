@@ -5,34 +5,33 @@
 ## Arhitectura
 
 ```
-[agent_write_article] → [subgraph: editor_final] → [human_review]
-                                                          ↑
-                                                     omul aproba
-                                                     sau rescrie
-                                                          ↓
-                                              TIME TRAVEL: revino la
-                                              subgraph cu text modificat
+[draft] → [subgraph: refine] → [review]
+                                   ↑
+                              omul aproba
+                              sau rescrie
+                                   ↓
+                       TIME TRAVEL: revino la
+                       subgraph cu text modificat
 ```
 
 ---
 
 ## TODO 1 — `state.py`
-Adauga campurile necesare in `GraphState`:
+Inlocuieste campul `text: str` cu campurile necesare in `SharedState`:
 - `article` — articolul generat (string)
 - `approved` — boolean care indica daca omul a aprobat articolul
 
 ---
 
 ## TODO 2 — `nodes.py` — nodul `agent_write_article`
-Inlocuieste `generate_text` cu un nod care apeleaza Groq pentru a genera un articol de presa scurt.
+Inlocuieste `draft_text` cu un nod care apeleaza Groq pentru a genera un articol de presa scurt.
 
 ```python
 from groq import Groq
-from ex_3_time_travel.state import GraphState
 
 client = Groq()
 
-def agent_write_article(state: GraphState):
+def agent_write_article(state: SharedState):
     print("\n[Node] Agent Write Article (Groq)...")
 
     response = client.chat.completions.create(
@@ -57,7 +56,7 @@ def agent_write_article(state: GraphState):
 ---
 
 ## TODO 3 — `subgraph.py` — nodul `editor_final`
-Subgraful are un nod `editor_final` care:
+Inlocuieste `subgraph_text` cu un nod `editor_final` care:
 - Primeste `state["article"]`
 - Adauga un header de presa deasupra articolului:
   ```
@@ -70,12 +69,12 @@ Subgraful are un nod `editor_final` care:
 ---
 
 ## TODO 4 — `nodes.py` — nodul `human_review`
-Nodul afiseaza articolul formatat si asteapta decizia omului:
+Actualizeaza `human_review` astfel incat sa afiseze articolul si sa astepte decizia omului:
 - Daca raspunsul este `"edit"`, citeste articolul nou pastat (multi-line, terminat cu `###`)
 - Seteaza `state["approved"] = True` in ambele cazuri
 
 ```python
-def human_review(state: GraphState):
+def human_review(state: SharedState):
     print("\n[Review] Articol curent:\n", state["article"])
     decizie = input("\nAproba sau editeaza? (yes/edit): ")
 
@@ -96,37 +95,24 @@ def human_review(state: GraphState):
 ---
 
 ## TODO 5 — `main.py`
-Conecteaza nodurile si adauga **Time Travel**:
-
-```
-agent_write_article → subgraph → human_review
-```
-
-Compileaza cu `MemorySaver` si `interrupt_before=["human_review"]`:
+Actualizeaza graful principal:
+- Redenumeste nodul `"draft"` in `"agent_write_article"` si inlocuieste importul `draft_text` cu `agent_write_article`
+- Redenumeste nodul `"review"` in `"human_review"` si actualizeaza `interrupt_before=["human_review"]`
+- Actualizeaza invoke-ul initial cu campurile noi:
 
 ```python
-app = build_graph()
-config = {"configurable": {"thread_id": "thread-1"}}
-
-# RUN 1: genereaza articolul, pauza inainte de review
 app.invoke({"article": "", "approved": False}, config=config)
+```
 
-# RUN 1 (continued): resume pentru human review
-app.invoke(None, config=config)
+- Actualizeaza time travel sa modifice `"article"` in loc de `"text"`:
 
-# TIME TRAVEL: gaseste checkpoint-ul inainte de subgraph
-history = list(app.get_state_history(config))
-target = next(s for s in history if s.next == ("subgraph",))
-
-# Modifica articolul la acel checkpoint
+```python
 updated_config = app.update_state(target.config, {"article": "Articol modificat prin time travel."})
+```
 
-# Replay de la checkpoint modificat — pauza inainte de review
-app.invoke(None, config=updated_config)
+- Actualizeaza output-ul final:
 
-# Resume final cu human review
-result = app.invoke(None, config=config)
-
+```python
 print("\nArticol final dupa time travel + human review:")
 print(result["article"])
 print("Aprobat:", result["approved"])
@@ -136,7 +122,7 @@ print("Aprobat:", result["approved"])
 
 ## Testare
 
-- [ ] Ruleaza si alege `yes` — verifica ca articolul generat de Groq apare formatat in output final
+- [ ] Ruleaza si alege `yes` — verifica ca textul generat apare formatat in output final
 - [ ] Ruleaza din nou si alege `edit` — verifica ca articolul editat de om (multi-line) este folosit in output final
 - [ ] Verifica time travel — articolul modificat la checkpoint trece din nou prin `editor_final` inainte de review
 

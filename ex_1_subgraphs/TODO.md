@@ -12,14 +12,14 @@
 ---
 
 ## TODO 1 — `state.py`
-Adauga campurile necesare in `GraphState`:
+Adauga campurile necesare in `SharedState` (inlocuieste `text: str`):
 - `lead_name`, `company`, `industry`, `budget`
 - `qualification` (HOT/WARM/COLD), `qualification_reason`
 - `pitch`
 
 ---
 
-## TODO 2 — `subgraph_qualify.py` *(fisier nou)*
+## TODO 2 — `subgraph_qualify.py` *(fisier nou — inlocuieste `subgraph.py`)*
 Creeaza un subgraf cu un singur nod `analyze_lead` care:
 - Apeleaza Groq cu datele lead-ului din state
 - Completeaza `qualification` si `qualification_reason`
@@ -43,20 +43,25 @@ System prompt sugestie: *"Esti un agent de vanzari. Scrie un email scurt de vanz
 ---
 
 ## TODO 4 — `nodes.py`
-Inlocuieste nodurile existente cu:
+Inlocuieste nodurile existente (`draft_text`, `run_subgraph`, `final_output`) din schelet cu:
 - `load_lead` — populeaza state cu date hardcodate de test
-- `run_qualify_subgraph` — invoca subgraful 1
-- `run_pitch_subgraph` — invoca subgraful 2
+- `run_qualify_subgraph(state, subgraph)` — invoca subgraful 1 (subgraf injectat)
+- `run_pitch_subgraph(state, subgraph)` — invoca subgraful 2 (subgraf injectat)
 - `format_output` — printeaza `qualification` + `pitch`
 
 ---
 
 ## TODO 5 — `main.py`
-Actualizeaza graful principal:
+Actualizeaza graful principal (inlocuieste cele 3 noduri existente: `draft`, `subgraph`, `final`):
 ```python
+from functools import partial
+
+qualify_subgraph = build_qualify_subgraph()
+pitch_subgraph = build_pitch_subgraph()
+
 graph.add_node("load_lead", load_lead)
-graph.add_node("qualify", run_qualify_subgraph)
-graph.add_node("pitch", run_pitch_subgraph)
+graph.add_node("qualify", partial(run_qualify_subgraph, subgraph=qualify_subgraph))
+graph.add_node("pitch", partial(run_pitch_subgraph, subgraph=pitch_subgraph))
 graph.add_node("format", format_output)
 
 graph.set_entry_point("load_lead")
@@ -68,7 +73,7 @@ graph.add_edge("pitch", "format")
 ---
 
 ## Rulare
+Adăugați cheia GROQ_API_KEY=gsk_... în fișierul .env
 ```bash
-export GROQ_API_KEY=gsk_...
 python -m ex_1_subgraphs.main
 ```

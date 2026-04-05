@@ -1,30 +1,27 @@
-from ex_2_human_in_the_loop.state import GraphState
-from ex_2_human_in_the_loop.subgraph import build_subgraph
+from ex_2_human_in_the_loop.state import SharedState
 
-# Initialize subgraph
-subgraph_app = build_subgraph()
 
 # -------------------------
-# NODE 1: GENERATE TEXT
+# NODE 1: DRAFT TEXT
 # -------------------------
-def generate_text(state: GraphState):
-    print("\n[Node] Generating text...")
-    state["text"] = "This is AI generated content."
+def draft_text(state: SharedState):
+    print("\n[Node] Drafting initial text...")
+    state["text"] = "The quick brown fox jumps over the lazy dog."
     return state
 
 
 # -------------------------
 # NODE 2: CALL SUBGRAPH
 # -------------------------
-def run_subgraph(state: GraphState):
-    print("\n[Node] Running subgraph...")
-    return subgraph_app.invoke(state)
+def run_subgraph(state: SharedState, subgraph):
+    print("\n[Node] Refining text via subgraph...")
+    return subgraph.invoke(state)
 
 
 # -------------------------
 # NODE 3: HUMAN-IN-LOOP
 # -------------------------
-def human_review(state: GraphState):
+def human_review(state: SharedState):
     print("\n[Node] Human Review")
     print("Current Output:", state["text"])
 

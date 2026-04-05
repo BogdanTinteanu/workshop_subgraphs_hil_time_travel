@@ -14,21 +14,20 @@
 ---
 
 ## TODO 1 — `state.py`
-Adauga campurile necesare in `GraphState`:
-- `text` — codul generat de agentul Groq (string)
+`SharedState` contine deja campul `text: str`. Adauga campul lipsa:
 - `approved` — boolean care indica daca omul a aprobat codul
 
 ---
 
 ## TODO 2 — `nodes.py` — nodul `agent_generate`
-Inlocuieste `generate_text` cu un nod `agent_generate` care apeleaza Groq pentru a genera cod Python.
+Inlocuieste `draft_text` cu un nod `agent_generate` care apeleaza Groq pentru a genera cod Python.
 
 ```python
 from groq import Groq
 
 client = Groq()
 
-def agent_generate(state: GraphState):
+def agent_generate(state: SharedState):
     print("\n[Node] Agent Generate (Groq)...")
 
     response = client.chat.completions.create(
@@ -53,12 +52,12 @@ def agent_generate(state: GraphState):
 ---
 
 ## TODO 3 — `nodes.py` — nodul `human_review`
-Nodul afiseaza codul generat si asteapta decizia omului prin `input()`:
+Actualizeaza nodul `human_review` existent astfel incat sa afiseze codul generat si sa astepte decizia omului prin `input()`:
 - Daca raspunsul este `"edit"`, cere codul nou si actualizeaza `state["text"]`
 - Seteaza `state["approved"] = True` in ambele cazuri
 
 ```python
-def human_review(state: GraphState):
+def human_review(state: SharedState):
     print("\n[Review] Cod curent:\n", state["text"])
     decizie = input("\nAproba sau editeaza? (yes/edit): ")
 
@@ -79,7 +78,7 @@ def human_review(state: GraphState):
 ---
 
 ## TODO 4 — `subgraph.py`
-Subgraful are un nod `process` care:
+Inlocuieste nodul `subgraph_text` (care adauga `"(refined by subgraph)"`) cu un nod `process` care:
 - Primeste `state["text"]`
 - Adauga un comentariu de header deasupra codului (ex: `"# Generat de AI\n" + text`)
 - Returneaza state-ul actualizat
@@ -87,15 +86,26 @@ Subgraful are un nod `process` care:
 ---
 
 ## TODO 5 — `main.py`
-Conecteaza nodurile in ordinea corecta:
+Actualizeaza graful principal (inlocuieste nodul `draft` cu `agent_generate` si redenumeste importul):
 
 ```
 agent_generate → subgraph → human_review
 ```
 
-Ruleaza cu:
+Schimba:
 ```python
-result = app.invoke({"text": "", "approved": False})
+# inainte (schelet)
+graph.add_node("draft", draft_text)
+from ex_2_human_in_the_loop.nodes import draft_text, run_subgraph, human_review
+
+# dupa
+graph.add_node("agent_generate", agent_generate)
+from ex_2_human_in_the_loop.nodes import agent_generate, run_subgraph, human_review
+```
+
+Actualizeaza si invoke-ul initial:
+```python
+result = app.invoke({"text": "", "approved": False}, config=config)
 print("\nOutput final:\n", result["text"])
 print("Aprobat:", result["approved"])
 ```
