@@ -120,6 +120,35 @@ print("Aprobat:", result["approved"])
 
 ---
 
+## TODO 6 — `main.py` — Time travel pana la nodul `agent_write_article`
+Adauga un al treilea bloc de time travel care reporneste fluxul de la inceput, inainte de generarea articolului.
+
+- Gaseste checkpoint-ul cu `next == ("agent_write_article",)` din istoric
+- Nu modifica state-ul — calatoreste la checkpoint-ul respectiv fara `update_state`
+- Ruleaza graful de la acel checkpoint (va genera un articol nou, va trece prin `editor_final`, si se va opri inainte de `human_review`)
+- Reia si review-ul final
+
+```python
+print("\n=== RUN 3: TIME TRAVEL (Start from agent_write_article) ===")
+
+history = list(app.get_state_history(config))
+target_draft = next(s for s in history if s.next == ("agent_write_article",))
+
+# Replay de la inceput, fara modificarea state-ului
+app.invoke(None, config=target_draft.config)
+print("[Paused before review node]")
+
+print("\n=== RUN 3 (continued): Resume for human review ===")
+result3 = app.invoke(None, config=target_draft.config)
+
+print("\nArticol final dupa time travel la draft:")
+print(result3["article"])
+```
+
+> **Observatie:** De fiecare data cand repornesti de la `agent_write_article`, Groq genereaza un articol diferit — time travel nu "memoreaza" output-ul LLM-ului, ci reia executia de la acel punct.
+
+---
+
 ## Testare
 
 - [ ] Ruleaza si alege `yes` — verifica ca textul generat apare formatat in output final
