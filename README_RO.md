@@ -228,3 +228,30 @@ ex_3_time_travel/
   nodes.py
   main.py        — rulează de două ori: rulare normală, apoi fork prin time travel dintr-un checkpoint anterior
 ```
+
+---
+
+## Glosar de termeni
+
+| Termen (EN) | Explicație |
+|-------------|------------|
+| **Graph** | Graf — structura principală din LangGraph; o rețea de pași (noduri) conectați prin săgeți (muchii) care definesc ordinea execuției |
+| **Node** | Nod — un pas individual din graf; o funcție Python care primește starea, face ceva cu ea și o returnează modificată |
+| **Edge** | Muchie — conexiunea dintre două noduri; spune grafului „după pasul A, mergi la pasul B" |
+| **State** | Stare — datele care circulă prin graf de la un nod la altul (în exemplele noastre, un dicționar cu câmpul `text`) |
+| **Subgraph** | Subgraf — un graf complet de sine stătător, apelat ca un singur pas din interiorul unui graf mai mare |
+| **Human-in-the-Loop** | Intervenție umană în buclă — mecanism prin care graful se oprește în mijlocul execuției și așteaptă ca un om să aprobe sau să corecteze rezultatul înainte de a continua |
+| **Time Travel** | Călătorie în timp — capacitatea de a inspecta istoricul stărilor unei rulări și de a relua graful de la orice punct anterior |
+| **Checkpoint** | Punct de salvare — o captură a stării complete a grafului, salvată automat după fiecare pas; stă la baza atât a human-in-the-loop, cât și a time travel |
+| **MemorySaver** | Modul de salvare în memorie — implementare simplă de checkpointing care păstrează toate stările în memoria RAM (util pentru dezvoltare și testare) |
+| **interrupt_before** | Întrerupe înainte — opțiune de compilare a grafului care îi spune să se oprească automat *înainte* de a executa un anumit nod |
+| **invoke** | Invocare — apelul principal pentru a porni sau a relua execuția unui graf (`graph.invoke(...)`) |
+| **fork** | Bifurcare — crearea unei noi ramuri de execuție plecând dintr-un checkpoint anterior, fără a modifica rularea originală |
+| **Draft** | Ciornă — primul pas dintr-un flux, care generează versiunea inițială a unui text sau rezultat |
+| **Review** | Revizuire — pasul în care un om (sau un alt sistem) verifică și aprobă sau modifică rezultatul curent |
+| **Flow** | Flux — ordinea în care nodurile unui graf sunt executate |
+| **Output** | Ieșire / Rezultat — datele produse la finalul execuției grafului sau al unui nod |
+| **Input** | Intrare — datele furnizate grafului la pornire |
+| **Setup** | Configurare — pașii de pregătire a mediului de lucru (instalarea dependențelor, etc.) |
+| **TypedDict** | Dicționar tipizat — tip Python din modulul `typing` care permite definirea unui dicționar cu chei și tipuri de valori fixe; folosit pentru a defini structura stării |
+| **thread_id** | ID de fir — identificator unic al unei conversații sau sesiuni; permite checkpointing-ului să separe stările mai multor rulări paralele |
