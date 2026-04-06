@@ -1,41 +1,31 @@
-from functools import partial
-from dotenv import load_dotenv
-load_dotenv()
-
 from langgraph.graph import StateGraph
-from ex_1_subgraphs.state import SharedState
-from ex_1_subgraphs.subgraph import build_subgraph
-from ex_1_subgraphs.nodes import draft_text, run_subgraph, final_output
+from functools import partial
+from .state import SharedState
+from .nodes import load_lead, run_qualify_subgraph, run_pitch_subgraph, format_output
+from .subgraph_qualify import build_qualify_subgraph
+from .subgraph_pitch import build_pitch_subgraph
 
+# 1. Instantiem subgrafurile
+qualify_subgraph = build_qualify_subgraph()
+pitch_subgraph = build_pitch_subgraph()
 
-# -------------------------
-# BUILD MAIN GRAPH
-# -------------------------
-def build_graph():
-    subgraph = build_subgraph()
+# 2. Construim graful principal
+builder = StateGraph(SharedState)
 
-    graph = StateGraph(SharedState)
+builder.add_node("load_lead", load_lead)
+# Injectam subgrafurile folosind partial
+builder.add_node("qualify", partial(run_qualify_subgraph, subgraph=qualify_subgraph))
+builder.add_node("pitch", partial(run_pitch_subgraph, subgraph=pitch_subgraph))
+builder.add_node("format", format_output)
 
-    graph.add_node("draft", draft_text)
-    graph.add_node("subgraph", partial(run_subgraph, subgraph=subgraph))
-    graph.add_node("final", final_output)
+# 3. Definim fluxul
+builder.set_entry_point("load_lead")
+builder.add_edge("load_lead", "qualify")
+builder.add_edge("qualify", "pitch")
+builder.add_edge("pitch", "format")
+builder.set_finish_point("format")
 
-    graph.set_entry_point("draft")
+graph = builder.compile()
 
-    graph.add_edge("draft", "subgraph")
-    graph.add_edge("subgraph", "final")
-
-    return graph.compile()
-
-
-# -------------------------
-# RUN WORKFLOW
-# -------------------------
 if __name__ == "__main__":
-    app = build_graph()
-
-    print("\n=== RUN: SUBGRAPHS DEMO ===")
-    result = app.invoke({"text": ""})
-
-    print("\nFinal Output:")
-    print(result["text"])
+    graph.invoke({})
