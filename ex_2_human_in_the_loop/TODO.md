@@ -92,17 +92,6 @@ Actualizeaza graful principal (inlocuieste nodul `draft` cu `agent_generate` si 
 agent_generate → subgraph → human_review
 ```
 
-Schimba:
-```python
-# inainte (schelet)
-graph.add_node("draft", draft_text)
-from ex_2_human_in_the_loop.nodes import draft_text, run_subgraph, human_review
-
-# dupa
-graph.add_node("agent_generate", agent_generate)
-from ex_2_human_in_the_loop.nodes import agent_generate, run_subgraph, human_review
-```
-
 Actualizeaza si invoke-ul initial:
 ```python
 app.invoke({"text": "", "approved": False}, config=config)
