@@ -22,6 +22,9 @@
 ## TODO 2 — `nodes.py` — nodul `agent_generate`
 Inlocuieste `draft_text` cu un nod `agent_generate` care apeleaza Groq pentru a genera cod Python.
 
+Agentul primeste un `system prompt` si un `user prompt` — **tu decizi ce functie vrei sa fie generata**.
+Alege ceva util, amuzant sau interesant: un calculator de fibonacci, un generator de parole, un convertor de unitati... orice.
+
 ```python
 from groq import Groq
 
@@ -35,11 +38,11 @@ def agent_generate(state: SharedState):
         messages=[
             {
                 "role": "system",
-                "content": "Esti un programator Python. Scrie o functie Python simpla si utila. Returneaza doar codul, fara explicatii.",
+                "content": "...",  # tu completezi
             },
             {
                 "role": "user",
-                "content": "Scrie o functie Python.",
+                "content": "...",  # tu completezi
             },
         ],
     )
@@ -80,8 +83,10 @@ def human_review(state: SharedState):
 ## TODO 4 — `subgraph.py`
 Inlocuieste nodul `subgraph_text` (care adauga `"(refined by subgraph)"`) cu un nod `process` care:
 - Primeste `state["text"]`
-- Adauga un comentariu de header deasupra codului (ex: `"# Generat de AI\n" + text`)
+- Transforma codul intr-un mod util sau estetic — **tu alegi ce face subgraful**
 - Returneaza state-ul actualizat
+
+Cateva idei: adauga un header cu numele tau si data, adauga un docstring generat de tine sau orice alt postprocesare care are sens pentru tine.
 
 ---
 

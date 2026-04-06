@@ -26,8 +26,10 @@ Inlocuieste campul `text: str` cu campurile necesare in `SharedState`:
 ## TODO 2 — `nodes.py` — nodul `agent_write_article`
 Inlocuieste `draft_text` cu un nod care apeleaza Groq pentru a genera un articol de presa scurt.
 
-System prompt: `Esti un jurnalist. Scrie un articol de presa scurt (3-5 propozitii) despre un eveniment fictiv. Returneaza doar articolul, fara titlu sau explicatii.`
-User prompt: `Scrie un articol de presa.`
+**Tu alegi subiectul articolului** — un eveniment fictiv, o descoperire stiintifica inventata, o stire absurda dar plauzibila. Reflecta asta in user prompt.
+
+System prompt sugestie: `Esti un jurnalist. Scrie un articol de presa scurt (3-5 propozitii) despre un eveniment fictiv. Returneaza doar articolul, fara titlu sau explicatii.`
+
 ```python
 from groq import Groq
 
@@ -36,7 +38,7 @@ client = Groq()
 def agent_write_article(state: SharedState):
     print("\n[Node] Agent Write Article (Groq)...")
 
-    response = #ToDo
+    response = #ToDo: apeleaza Groq cu propriul tau subiect
 
     state["article"] = response.choices[0].message.content
     print("\n[Agent] Articol generat:\n", state["article"])
@@ -48,13 +50,15 @@ def agent_write_article(state: SharedState):
 ## TODO 3 — `subgraph.py` — nodul `editor_final`
 Inlocuieste `subgraph_text` cu un nod `editor_final` care:
 - Primeste `state["article"]`
-- Adauga un header de presa deasupra articolului:
-  ```
-  === ARTICOL DE PRESA ===
-  <articolul>
-  ========================
-  ```
+- Formateaza articolul cu un header de presa — **tu alegi cum arata header-ul**
 - Returneaza state-ul actualizat
+
+Sugestie de format, dar simte-te liber sa-l personalizezi (adauga un nume de publicatie fictiva, o data, un autor inventat):
+```
+=== ARTICOL DE PRESA ===
+<articolul>
+========================
+```
 
 ---
 
@@ -94,10 +98,10 @@ Actualizeaza graful principal:
 app.invoke({"article": "", "approved": False}, config=config)
 ```
 
-- Actualizeaza time travel sa modifice `"article"` in loc de `"text"`:
+- Actualizeaza time travel sa modifice `"article"` in loc de `"text"` — **tu scrii articolul de inlocuit**, nu trebuie sa fie placeholder generic:
 
 ```python
-updated_config = app.update_state(target.config, {"article": "Articol modificat prin time travel."})
+updated_config = app.update_state(target.config, {"article": "..."})
 ```
 
 - Actualizeaza output-ul final:

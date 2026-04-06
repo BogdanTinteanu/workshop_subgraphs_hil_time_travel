@@ -36,11 +36,11 @@ def analyze_lead(state: SharedState):
         messages=[
             {
                 "role": "system",
-                "content": #ToDo: adaugare prompt,
+                "content": #ToDo: scrie propriul tau system prompt pentru calificare,
             },
             {
                 "role": "user",
-                "content": ( #ToDo: adaugare content
+                "content": ( #ToDo: construieste mesajul cu datele din state
                 ),
             },
         ],
@@ -73,12 +73,16 @@ def analyze_lead(state: SharedState):
 
 System prompt sugestie: *"Esti un agent de calificare vanzari. Analizeaza datele prospectului si raspunde cu: CALIFICARE: HOT/WARM/COLD. MOTIV: <scurt>"*
 
+Incearca sa faci prompt-ul mai specific industriei alese in TODO 4 — un agent specializat in tech va vorbi altfel decat unul specializat in retail.
+
 ---
 
 ## TODO 3 — `subgraph_pitch.py` *(fisier nou)*
 Creeaza un subgraf cu un singur nod `draft_pitch` care:
 - Apeleaza Groq cu `qualification` + datele lead-ului
 - Completeaza `pitch` cu un mesaj scurt de vanzari (max 50 cuvinte)
+
+**Tu alegi tonul pitchului** — formal si sobru pentru un lead COLD, entuziast si direct pentru HOT. Reflecta asta in system prompt.
 
 System prompt sugestie: *"Esti un agent de vanzari. Scrie un email scurt de vanzari adaptat calificarii prospectului."*
 
@@ -91,11 +95,11 @@ def draft_pitch(state: SharedState):
         messages=[
             {
                 "role": "system",
-                "content": #ToDo: adaugare prompt
+                "content": #ToDo: scrie propriul tau system prompt pentru pitch
             },
             {
                 "role": "user",
-                "content": (#ToDo: adaugare content
+                "content": (#ToDo: construieste mesajul cu datele din state
                 ),
             },
         ],
@@ -114,6 +118,8 @@ Inlocuieste nodurile existente (`draft_text`, `run_subgraph`, `final_output`) di
 - `run_qualify_subgraph(state, subgraph)` — invoca subgraful 1 (subgraf injectat)
 - `run_pitch_subgraph(state, subgraph)` — invoca subgraful 2 (subgraf injectat)
 - `format_output` — printeaza `qualification` + `pitch`
+
+**Tu alegi lead-ul de test** — inventeaza o companie fictiva, o industrie si un buget care ti se par interesante. Datele pe care le pui aici vor influenta direct ce genereaza Groq.
 
 ```python
 def run_qualify_subgraph(state: SharedState, subgraph):
